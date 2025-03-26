@@ -50,7 +50,7 @@
   </style>
 </head>
 <body>
-  <h2> Realtime blaze pose4</h2>
+  <h2> Realtime blaze pose5</h2>
 
   <div id="container">
     <video id="video" width="640" height="480" autoplay muted></video>
@@ -117,44 +117,23 @@
         solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/pose',
         modelType: 'lite'
       });
+      const isMobile = /Android|iPhone/i.test(navigator.userAgent);
+      const shouldFlip = isMobile;
 
       const render = async () => {
         const poses = await detector.estimatePoses(video);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.save();
-        ctx.scale(-1, 1);
-        ctx.translate(-canvas.width, 0);
-
-        if (poses.length > 0 && poses[0].keypoints) {
-          const row = [];
-
-          poses[0].keypoints.forEach((kp, i) => {
-            if (kp.score > 0.4) {
-              ctx.beginPath();
-              ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI);
-              ctx.fillStyle = 'red';
-              ctx.fill();
-
-              ctx.font = '10px Arial';
-              ctx.fillStyle = 'blue';
-              ctx.fillText(keypointNames[i], kp.x + 6, kp.y + 6);
-
-              if (recording) {
-                row.push(kp.x.toFixed(4), kp.y.toFixed(4), kp.score.toFixed(4));
-              }
-            } else {
-              if (recording) {
-                row.push('', '', '');
-              }
-            }
-          });
-
-          if (recording) {
-            csvData.push(row);
-          }
+        if (shouldFlip) {
+          ctx.scale(-1, 1);
+          ctx.translate(-canvas.width, 0);
         }
-
+      
+        if (poses.length > 0) {
+          // draw keypoints
+        }
+      
         ctx.restore();
         requestAnimationFrame(render);
       };
