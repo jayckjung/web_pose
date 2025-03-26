@@ -95,10 +95,15 @@
 
     async function setupCamera() {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      video.srcObject = stream;
-      return new Promise(resolve => {
-        video.onloadedmetadata = () => { resolve(video); };
-      });
+        video.srcObject = stream;
+        return new Promise(resolve => {
+          video.onloadedmetadata = () => {
+            // 비디오의 실제 해상도로 캔버스 크기 설정
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            resolve(video);
+          };
+        });
     }
 
     async function main() {
