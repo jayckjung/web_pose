@@ -54,8 +54,8 @@
     <canvas id="canvas"></canvas>
   </div>
   <div style="margin-bottom: 10px;">
-    <label for="username">이름: </label>
-    <input type="text" id="username" placeholder="홍길동" style="font-size: 16px; padding: 5px;">
+    <label for="username">Name: </label>
+    <input type="text" id="username" placeholder="John" style="font-size: 16px; padding: 5px;">
   </div>
 
   <div id="controls">
@@ -113,7 +113,9 @@
       
       video.width = w;
       video.height = h;
-      
+      const container = document.getElementById('container');
+      container.style.width = w + 'px';
+      container.style.height = h + 'px';
       const detector = await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
         runtime: 'mediapipe',
         solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/pose',
