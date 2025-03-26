@@ -50,7 +50,7 @@
   </style>
 </head>
 <body>
-  <h2> Realtime blaze pose6</h2>
+  <h2> Realtime blaze pose7</h2>
 
   <div id="container">
     <video id="video" width="640" height="480" autoplay muted></video>
@@ -118,13 +118,17 @@
         modelType: 'lite'
       });
       const isMobile = /Android|iPhone/i.test(navigator.userAgent);
-      const shouldFlip = isMobile;
+      const shouldFlip = !isMobile;
 
       const render = async () => {
         const poses = await detector.estimatePoses(video);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.save();
+        if (shouldFlip) {
+          ctx.scale(-1, 1);
+          ctx.translate(-canvas.width, 0);
+        }
         if (poses.length > 0 && poses[0].keypoints) {
             poses[0].keypoints.forEach((kp, i) => {
               if (kp.score > 0.4) {
