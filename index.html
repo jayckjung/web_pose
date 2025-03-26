@@ -21,9 +21,6 @@
       display: inline-block;
       margin: 0 auto;
       border: 2px dashed #ccc;
-      width: 640px;
-      height: 480px; /* ✅ 영상/캔버스 크기와 반드시 일치! */
-
     }
 
     video, canvas {
@@ -31,8 +28,6 @@
       top: 0;
       left: 0;
       z-index: 0;
-      width: 640px;
-      height: 480px;
     }
 
     canvas {
@@ -52,7 +47,7 @@
   </style>
 </head>
 <body>
-  <h2> Realtime blaze pose13</h2>
+  <h2> Realtime blaze pose14</h2>
 
   <div id="container">
     <video id="video" autoplay muted playsinline></video>
@@ -111,10 +106,14 @@
     async function main() {
       await setupCamera();
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      video.width = video.videoWidth;
-      video.height = video.videoHeight;
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+      canvas.width = w;
+      canvas.height = h;
+      
+      video.width = w;
+      video.height = h;
+      
       const detector = await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
         runtime: 'mediapipe',
         solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/pose',
