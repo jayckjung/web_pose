@@ -144,6 +144,10 @@
                 ctx.fillText(keypointNames[i], kp.x + 6, kp.y + 6);
               }
             });
+            if (recording) {
+              const row = poses[0].keypoints.flatMap(kp => [kp.x, kp.y, kp.score]);
+              csvData.push(row);
+            }
           }
       
         ctx.restore();
