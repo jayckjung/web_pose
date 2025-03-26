@@ -18,9 +18,9 @@
 
     #container {
       position: relative;
-      width: 640px;
-      height: 480px;
-      margin: 30px auto;
+      width: fit-content;
+      margin: auto;
+
     }
 
     video, canvas {
@@ -50,7 +50,7 @@
   </style>
 </head>
 <body>
-  <h2> Realtime blaze pose7</h2>
+  <h2> Realtime blaze pose8</h2>
 
   <div id="container">
     <video id="video" width="640" height="480" autoplay muted></video>
@@ -111,7 +111,8 @@
 
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-
+      video.width = video.videoWidth;
+      video.height = video.videoHeight;
       const detector = await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
         runtime: 'mediapipe',
         solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/pose',
@@ -126,8 +127,8 @@
 
         ctx.save();
         if (shouldFlip) {
-          ctx.scale(-1, 1);
-          ctx.translate(-canvas.width, 0);
+          //ctx.scale(-1, 1);
+          //ctx.translate(-canvas.width, 0);
         }
         if (poses.length > 0 && poses[0].keypoints) {
             poses[0].keypoints.forEach((kp, i) => {
