@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+
+  <title>BlazePose Web2</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                     'Apple Color Emoji', 'Segoe UI Emoji', Arial, sans-serif;
+      font-size: 16px;
+      color: #111;
+      background-color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    #container {
+      position: relative;
+      width: 640px;
+      height: 480px;
+      margin: 30px auto;
+    }
+
+    video, canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    video {
+      transform: scaleX(-1);
+      z-index: 0;
+    }
+    canvas {
+      z-index: 1;
+    }
+
+    #controls {
+      margin-top: 10px;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2> Realtime blaze pose</h2>
+
+  <div id="container">
+    <video id="video" width="640" height="480" autoplay muted></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+  </div>
+  <div style="margin-bottom: 10px;">
+    <label for="username">이름: </label>
+    <input type="text" id="username" placeholder="홍길동" style="font-size: 16px; padding: 5px;">
+  </div>
+
+  <div id="controls">
+    <button onclick="startRecording()">🔴 Start</button>
+    <button onclick="stopRecording()">⏹️ End</button>
+  </div>
+  <div id="status" style="margin-top: 10px; font-weight: bold; font-size: 16px;"></div>
+
+  <!-- TensorFlow + BlazePose -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let recording = false;
+    let csvData = [];
+
+    const keypointNames = [
+      "nose","left_eye","right_eye","left_ear","right_ear",
+      "left_shoulder","right_shoulder","left_elbow","right_elbow",
+      "left_wrist","right_wrist","left_hip","right_hip",
+      "left_knee","right_knee","left_ankle","right_ankle",
+      "left_heel","right_heel","left_foot_index","right_foot_index",
+      "left_pinky","right_pinky","left_index","right_index",
+      "left_thumb","right_thumb","left_eye_inner","left_eye_outer",
+      "right_eye_inner","right_eye_outer","mouth_left","mouth_right"
+    ];
+
+    async function setupCamera() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      return new Promise(resolve => {
+        video.onloadedmetadata = () => { resolve(video); };
+      });
+    }
+
+    async function main() {
+      await setupCamera();
+      const detector = await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
+        runtime: 'mediapipe',
+        solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/pose',
+        modelType: 'lite'
+      });
+
+      const render = async () => {
+        const poses = await detector.estimatePoses(video);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.scale(-1, 1);
+        ctx.translate(-canvas.width, 0);
+
+        if (poses.length > 0 && poses[0].keypoints) {
+          const row = [];
+
+          poses[0].keypoints.forEach((kp, i) => {
+            if (kp.score > 0.4) {
+              ctx.beginPath();
+              ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI);
+              ctx.fillStyle = 'red';
+              ctx.fill();
+
+              ctx.font = '10px Arial';
+              ctx.fillStyle = 'blue';
+              ctx.fillText(keypointNames[i], kp.x + 6, kp.y + 6);
+
+              if (recording) {
+                row.push(kp.x.toFixed(4), kp.y.toFixed(4), kp.score.toFixed(4));
+              }
+            } else {
+              if (recording) {
+                row.push('', '', '');
+              }
+            }
+          });
+
+          if (recording) {
+            csvData.push(row);
+          }
+        }
+
+        ctx.restore();
+        requestAnimationFrame(render);
+      };
+
+      render();
+    }
+
+    function startRecording() {
+      recording = true;
+      csvData = [];
+      
+      const status = document.getElementById('status');
+      status.innerText = '📡 레코딩 중...';
+      status.style.color = 'red';
+    }
+
+    
+    function stopRecording() {
+      recording = false;
+
+      // 상태 표시 지우기
+      const status = document.getElementById('status');
+      status.innerText = '';
+
+      // 📌 사용자 이름 가져오기
+      const username = document.getElementById('username').value.trim() || 'unknown';
+
+      // ⏰ 현재 시간 문자열 생성 (YYYY-MM-DD-HH-MM)
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const hh = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      const timestamp = `${yyyy}-${mm}-${dd}-${hh}-${min}`;
+
+      // 📁 파일명 생성
+      const filename = `${username}_${timestamp}.csv`;
+
+      // 📄 CSV 생성
+      let header = [];
+      keypointNames.forEach(name => {
+        header.push(`${name}_x`, `${name}_y`, `${name}_score`);
+      });
+
+      let csvContent = [header.join(',')];
+      csvData.forEach(row => {
+        csvContent.push(row.join(','));
+      });
+
+      const blob = new Blob([csvContent.join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+    }
+
+
+    main();
+  </script>
+</body>
+</html>
