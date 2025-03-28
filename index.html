@@ -47,7 +47,7 @@
   </style>
 </head>
 <body>
-  <h2> Realtime pose5</h2>
+  <h2> Realtime pose7</h2>
 
   <div id="container">
     <video id="video" autoplay muted playsinline></video>
@@ -81,7 +81,6 @@
     let csvData = [];
     let currentFacingMode = 'user';
     let detector;
-    let renderLoopStarted = false;
 
     const excludeIndices = [1, 2, 3, 4, 5, 6, 9, 10, 17, 18, 21, 22];
     const keypointNames = [
@@ -131,6 +130,7 @@
       }
       currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
       await setupCamera(currentFacingMode);
+      render(); // 🔁 새 비디오로 render 재시작
     }
 
     async function render() {
@@ -184,10 +184,7 @@
         solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/pose',
         modelType: 'lite'
       });
-      if (!renderLoopStarted) {
-        renderLoopStarted = true;
-        render();
-      }
+      render();
     }
 
     function startRecording() {
