@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlazePose Web2</title>
+  <title>BlazePose Web3</title>
   <style>
     body {
       text-align: center;
@@ -85,12 +85,39 @@
     
     const excludeIndices = [1, 2, 3, 4, 5, 6, 9, 10, 17, 18, 21, 22];
     const keypointNames = [
-      "nose", "left_ear", "right_ear", "left_shoulder", "right_shoulder",
-      "left_elbow", "right_elbow", "left_wrist", "right_wrist", "left_index",
-      "right_thumb", "left_hip", "right_hip", "left_knee", "right_knee",
-      "left_ankle", "right_ankle", "left_heel", "right_heel",
-      "left_foot_index", "right_foot_index", "bodyCenter", "forehead",
-      "leftThumb", "leftHand", "rightThumb", "rightHand"
+      "nose",              // 0
+     // null, null, null,    // 1-3 left eye
+     // null, null, null,    // 4-6 right eye
+      "left_ear",          // 7
+      "right_ear",         // 8
+     // null, null,          // 9-10 mouth
+      "left_shoulder",     // 11
+      "right_shoulder",    // 12
+      "left_elbow",        // 13
+      "right_elbow",       // 14
+      "left_wrist",        // 15
+      "right_wrist",       // 16
+      //null, null,          // 17-18 pinky
+      "left_index",        // 19
+     // null,                // 20 (right_index 제외)
+      //null,                // 21 (left_thumb 제외)
+      "right_thumb",       // 22
+      "left_hip",          // 23
+      "right_hip",         // 24
+      "left_knee",         // 25
+      "right_knee",        // 26
+      "left_ankle",        // 27
+      "right_ankle",       // 28
+      "left_heel",         // 29
+      "right_heel",        // 30
+      "left_foot_index",   // 31
+      "right_foot_index",  // 32
+      "bodyCenter",        // 33
+      "forehead",          // 34
+      "leftThumb",         // 35
+      "leftHand",          // 36
+      "rightThumb",        // 37
+      "rightHand"          // 38
     ];
 
     const skeletonEdges = [
