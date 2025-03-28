@@ -80,14 +80,74 @@
     let csvData = [];
 
     const keypointNames = [
-      "nose","left_eye","right_eye","left_ear","right_ear",
-      "left_shoulder","right_shoulder","left_elbow","right_elbow",
-      "left_wrist","right_wrist","left_hip","right_hip",
-      "left_knee","right_knee","left_ankle","right_ankle",
-      "left_heel","right_heel","left_foot_index","right_foot_index",
-      "left_pinky","right_pinky","left_index","right_index",
-      "left_thumb","right_thumb","left_eye_inner","left_eye_outer",
-      "right_eye_inner","right_eye_outer","mouth_left","mouth_right"
+      "nose",             // 0
+      "left_ear",         // 7
+      "right_ear",        // 8
+      "left_shoulder",    // 11
+      "right_shoulder",   // 12
+      "left_elbow",       // 13
+      "right_elbow",      // 14
+      "left_wrist",       // 15
+      "right_wrist",      // 16
+      "left_index",       // 19
+      "right_index",      // 20
+      "left_hip",         // 23
+      "right_hip",        // 24
+      "left_knee",        // 25
+      "right_knee",       // 26
+      "left_ankle",       // 27
+      "right_ankle",      // 28
+      "left_heel",        // 29
+      "right_heel",       // 30
+      "left_foot_index",  // 31
+      "right_foot_index", // 32
+      "bodyCenter",       // 33
+      "forehead",         // 34
+      "leftThumb",        // 35
+      "leftHand",         // 36
+      "rightThumb",       // 37
+      "rightHand"         // 38
+    ];
+
+    const skeletonEdges = [
+      // torso
+      [0, 1], [1, 2], [2, 0] // head
+      [3, 4], // left_shoulder → right_shoulder
+      [3, 11], // left_shoulder → left_hip
+      [4, 12], // right_shoulder → right_hip
+      [11, 12], // left_hip → right_hip
+    
+      // left arm
+      [3, 5],  // left_shoulder → left_elbow
+      [5, 7],  // left_elbow → left_wrist
+      [7, 9],  // left_wrist → left_index
+      [7, 23], // left_wrist → leftThumb
+      [7, 24], // left_wrist → leftHand
+    
+      // right arm
+      [4, 6],  // right_shoulder → right_elbow
+      [6, 8],  // right_elbow → right_wrist
+      [8, 10], // right_wrist → right_index
+      [8, 25], // right_wrist → rightThumb
+      [8, 26], // right_wrist → rightHand
+    
+      // left leg
+      [11, 13], // left_hip → left_knee
+      [13, 15], // left_knee → left_ankle
+      [15, 17], // left_ankle → left_heel
+      [17, 19], // left_heel → left_foot_index
+    
+      // right leg
+      [12, 14], // right_hip → right_knee
+      [14, 16], // right_knee → right_ankle
+      [16, 18], // right_ankle → right_heel
+      [18, 20], // right_heel → right_foot_index
+    
+      // center
+      [0, 21],  // nose → bodyCenter
+      [21, 11], // bodyCenter → left_hip
+      [21, 12], // bodyCenter → right_hip
+      [0, 22]   // nose → forehead
     ];
 
     async function setupCamera() {
@@ -123,7 +183,7 @@
       });
       const isMobile = /Android|iPhone/i.test(navigator.userAgent);
       const shouldFlip = !isMobile;
-      const excludeIndices = [1, 2, 3, 4, 5, 6, 9, 10, 17, 18, 20, 21];
+      const excludeIndices = [1, 2, 3, 4, 5, 6, 9, 10, 17, 18, 21, 22];
 
       const render = async () => {
         const poses = await detector.estimatePoses(video);
@@ -144,6 +204,18 @@
                 ctx.font = '10px sans-serif';
                 ctx.fillStyle = 'blue';
                 ctx.fillText(keypointNames[i], kp.x + 6, kp.y + 6);
+              }
+            });
+            skeletonEdges.forEach(([i, j]) => {
+              const kp1 = filteredKeypoints[i];
+              const kp2 = filteredKeypoints[j];
+              if (kp1.score > 0.4 && kp2.score > 0.4) {
+                ctx.beginPath();
+                ctx.moveTo(kp1.x, kp1.y);
+                ctx.lineTo(kp2.x, kp2.y);
+                ctx.strokeStyle = 'lime';
+                ctx.lineWidth = 2;
+                ctx.stroke();
               }
             });
             if (recording) {
