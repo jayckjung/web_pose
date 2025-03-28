@@ -47,7 +47,7 @@
   </style>
 </head>
 <body>
-  <h2> Realtime pose1</h2>
+  <h2> Realtime pose2</h2>
 
   <div id="container">
     <video id="video" autoplay muted playsinline></video>
@@ -217,20 +217,6 @@
             }
           });
         
-          // 🔺 삼각형 (0, 1, 2: nose, left_ear, right_ear)
-          const triangleEdges = [[0, 1], [1, 2], [2, 0]];
-          triangleEdges.forEach(([i, j]) => {
-            const kp1 = filteredKeypoints[i];
-            const kp2 = filteredKeypoints[j];
-            if (kp1.score > 0.4 && kp2.score > 0.4) {
-              ctx.beginPath();
-              ctx.moveTo(kp1.x, kp1.y);
-              ctx.lineTo(kp2.x, kp2.y);
-              ctx.strokeStyle = 'orange';
-              ctx.lineWidth = 2;
-              ctx.stroke();
-            }
-          });
         
           // 🦴 일반 스켈레톤 연결
           skeletonEdges.forEach(([i, j]) => {
