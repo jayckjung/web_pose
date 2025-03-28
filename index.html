@@ -47,7 +47,7 @@
   </style>
 </head>
 <body>
-  <h2> Realtime blaze pose14</h2>
+  <h2> Realtime pose1</h2>
 
   <div id="container">
     <video id="video" autoplay muted playsinline></video>
@@ -123,6 +123,7 @@
       });
       const isMobile = /Android|iPhone/i.test(navigator.userAgent);
       const shouldFlip = !isMobile;
+      const excludeIndices = [1, 2, 3, 4, 5, 6, 9, 10, 17, 18, 20, 21];
 
       const render = async () => {
         const poses = await detector.estimatePoses(video);
@@ -131,6 +132,7 @@
         ctx.save();
         if (poses.length > 0 && poses[0].keypoints) {
             poses[0].keypoints.forEach((kp, i) => {
+              if (excludeIndices.includes(i)) return; // 스킵
               if (kp.score > 0.4) {
                 // 🔴 점 그리기
                 ctx.beginPath();
@@ -191,15 +193,17 @@
 
       // 📄 CSV 생성
       let header = [];
-      keypointNames.forEach(name => {
-        header.push(`${name}_x`, `${name}_y`, `${name}_score`);
+      keypointNames.forEach((name, i) => {
+        if (!excludeIndices.includes(i)) {
+          header.push(`${name}_x`, `${name}_y`, `${name}_score`);
+        }
       });
-
+      
       let csvContent = [header.join(',')];
       csvData.forEach(row => {
         csvContent.push(row.join(','));
       });
-
+      
       const blob = new Blob([csvContent.join('\n')], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
