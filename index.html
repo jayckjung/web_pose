@@ -138,6 +138,7 @@
         requestAnimationFrame(render);
         return;
       }
+      let timestamps = [];
 
       const poses = await detector.estimatePoses(video);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -176,6 +177,7 @@
         if (recording) {
           const row = filteredKeypoints.flatMap(kp => [kp.x, kp.y, kp.score]);
           csvData.push(row);
+          timestamps.push(Date.now()); // ✅ 각 프레임별 시간 저장
         }
       }
       ctx.restore();
@@ -212,14 +214,32 @@
       const min = String(now.getMinutes()).padStart(2, '0');
       const timestamp = `${yyyy}-${mm}-${dd}-${hh}-${min}`;
       const filename = `${username}_${timestamp}.csv`;
+
+      
       let header = [];
       keypointNames.forEach((name, i) => {
         if (!excludeIndices.includes(i)) {
           header.push(`${name}_x`, `${name}_y`, `${name}_score`);
         }
       });
+
+      
       let csvContent = [header.join(',')];
-      csvData.forEach(row => csvContent.push(row.join(',')));
+      csvData.forEach((row, index) => {
+        const filteredRow = [];
+        filteredRow.push(timestamps[index]); // ✅ 이 시점의 시간
+      
+        row.forEach((val, i) => {
+          const kpIndex = Math.floor(i / 3);
+          if (!excludeIndices.includes(kpIndex)) {
+            filteredRow.push(val);
+          }
+        });
+      
+        csvContent.push(filteredRow.join(','));
+      });
+
+      
       const blob = new Blob([csvContent.join('\n')], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
