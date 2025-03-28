@@ -204,20 +204,10 @@
                 ctx.font = '10px sans-serif';
                 ctx.fillStyle = 'blue';
                 ctx.fillText(keypointNames[i], kp.x + 6, kp.y + 6);
-                skeletonEdges.forEach(([i, j]) => {
-                  const kp1 = filteredKeypoints[i];
-                  const kp2 = filteredKeypoints[j];
-                  if (kp1.score > 0.4 && kp2.score > 0.4) {
-                    ctx.beginPath();
-                    ctx.moveTo(kp1.x, kp1.y);
-                    ctx.lineTo(kp2.x, kp2.y);
-                    ctx.strokeStyle = 'lime';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                  }
-                });
+                
               }
             });
+
             
             if (recording) {
               const row = poses[0].keypoints.flatMap(kp => [kp.x, kp.y, kp.score]);
