@@ -81,7 +81,8 @@
     let csvData = [];
     let currentFacingMode = 'user';
     let detector;
-
+    let timestamps = [];
+    
     const excludeIndices = [1, 2, 3, 4, 5, 6, 9, 10, 17, 18, 21, 22];
     const keypointNames = [
       "nose", "left_ear", "right_ear", "left_shoulder", "right_shoulder",
@@ -138,7 +139,7 @@
         requestAnimationFrame(render);
         return;
       }
-      let timestamps = [];
+      
 
       const poses = await detector.estimatePoses(video);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
