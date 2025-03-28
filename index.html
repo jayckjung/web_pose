@@ -189,7 +189,7 @@
       });
       const isMobile = /Android|iPhone/i.test(navigator.userAgent);
       const shouldFlip = !isMobile;
-      const excludeIndices = [1, 2, 3, 4, 5, 6, 9, 10, 17, 18, 21, 22];
+      
 
       const render = async () => {
         const poses = await detector.estimatePoses(video);
@@ -197,29 +197,62 @@
 
         ctx.save();
         if (poses.length > 0 && poses[0].keypoints) {
-            poses[0].keypoints.forEach((kp, i) => {
-              if (excludeIndices.includes(i)) return; // 스킵
-              if (kp.score > 0.4) {
-                // 🔴 점 그리기
-                ctx.beginPath();
-                ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI);
-                ctx.fillStyle = 'red';
-                ctx.fill();
+          const excludeIndices = [1, 2, 3, 4, 5, 6, 9, 10, 17, 18, 21, 22];
+          const keypoints = poses[0].keypoints;
         
-                // 🔵 이름 표시
-                ctx.font = '10px sans-serif';
-                ctx.fillStyle = 'blue';
-                ctx.fillText(keypointNames[i], kp.x + 6, kp.y + 6);
-                
-              }
-            });
-
-            
-            if (recording) {
-              const row = poses[0].keypoints.flatMap(kp => [kp.x, kp.y, kp.score]);
-              csvData.push(row);
+          // ✅ 필요한 포인트만 필터링 (순서 유지)
+          const filteredKeypoints = keypoints.filter((_, i) => !excludeIndices.includes(i));
+        
+          // 🔴 점 + 이름
+          filteredKeypoints.forEach((kp, i) => {
+            if (kp.score > 0.4) {
+              ctx.beginPath();
+              ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI);
+              ctx.fillStyle = 'red';
+              ctx.fill();
+        
+              ctx.font = '10px sans-serif';
+              ctx.fillStyle = 'blue';
+              ctx.fillText(keypointNames[i], kp.x + 6, kp.y + 6);
             }
+          });
+        
+          // 🔺 삼각형 (0, 1, 2: nose, left_ear, right_ear)
+          const triangleEdges = [[0, 1], [1, 2], [2, 0]];
+          triangleEdges.forEach(([i, j]) => {
+            const kp1 = filteredKeypoints[i];
+            const kp2 = filteredKeypoints[j];
+            if (kp1.score > 0.4 && kp2.score > 0.4) {
+              ctx.beginPath();
+              ctx.moveTo(kp1.x, kp1.y);
+              ctx.lineTo(kp2.x, kp2.y);
+              ctx.strokeStyle = 'orange';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+            }
+          });
+        
+          // 🦴 일반 스켈레톤 연결
+          skeletonEdges.forEach(([i, j]) => {
+            const kp1 = filteredKeypoints[i];
+            const kp2 = filteredKeypoints[j];
+            if (kp1.score > 0.4 && kp2.score > 0.4) {
+              ctx.beginPath();
+              ctx.moveTo(kp1.x, kp1.y);
+              ctx.lineTo(kp2.x, kp2.y);
+              ctx.strokeStyle = 'lime';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+            }
+          });
+        
+          // ⏺️ CSV 저장
+          if (recording) {
+            const row = filteredKeypoints.flatMap(kp => [kp.x, kp.y, kp.score]);
+            csvData.push(row);
           }
+        }
+
       
         ctx.restore();
         requestAnimationFrame(render);
