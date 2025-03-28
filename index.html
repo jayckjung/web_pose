@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <html>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -73,6 +78,23 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
 
   <script>
+
+  
+    // ✅ Firebase 초기화 (firebaseConfig는 네 설정값으로 대체해야 함)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFYq5Er5h62USTGzpW9G-Wzui7YM9ooOQ",
+      authDomain: "webpose-dc1a7.firebaseapp.com",
+      databaseURL: "https://webpose-dc1a7-default-rtdb.firebaseio.com",
+      projectId: "webpose-dc1a7",
+      storageBucket: "webpose-dc1a7.firebasestorage.app",
+      messagingSenderId: "238230161559",
+      appId: "1:238230161559:web:caf79298ecfbc7321c01d2",
+      measurementId: "G-0G6JYLMFZY"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
