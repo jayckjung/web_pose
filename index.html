@@ -49,7 +49,7 @@
   </style>
 </head>
 <body>
-  <h2> Realtime pose4</h2>
+  <h2> Realtime pose5</h2>
 
   <div id="container">
     <video id="video" autoplay muted playsinline></video>
@@ -188,9 +188,18 @@
     }
 
     async function toggleCamera() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoInputs = devices.filter(d => d.kind === 'videoinput');
+    
+      if (videoInputs.length < 2) {
+        alert("🔁 전환 가능한 카메라가 하나뿐입니다.");
+        return;
+      }
+    
       currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
       await setupCamera(currentFacingMode);
     }
+
 
     async function main() {
       await setupCamera(currentFacingMode);
