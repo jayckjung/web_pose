@@ -245,6 +245,7 @@
 
       
       let header = [];
+      header.push(`time`);
       keypointNames.forEach((name, i) => {
         if (!excludeIndices.includes(i)) {
           header.push(`${name}_x`, `${name}_y`, `${name}_score`);
