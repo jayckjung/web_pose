@@ -73,6 +73,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+  <script src="https://cdn.jsdelivr.net/gh/jcmellado/js-aruco/build/aruco.min.js"></script>
 
   <script>
 
@@ -203,7 +204,28 @@
           }
         });
 
-
+        
+        // 🟡 ArUco 마커 처리
+        const markers = detectArucoMarkersFromCanvas(canvas);
+        markers.forEach(marker => {
+          ctx.beginPath();
+          ctx.strokeStyle = 'yellow';
+          ctx.lineWidth = 3;
+      
+          const corners = marker.corners;
+          for (let i = 0; i < corners.length; i++) {
+            const c1 = corners[i];
+            const c2 = corners[(i + 1) % corners.length];
+            ctx.moveTo(c1.x, c1.y);
+            ctx.lineTo(c2.x, c2.y);
+          }
+          ctx.stroke();
+      
+          // 🔢 마커 ID 표시
+          ctx.fillStyle = 'black';
+          ctx.font = '16px sans-serif';
+          ctx.fillText(`ID: ${marker.id}`, corners[0].x, corners[0].y - 10);
+        });
 
         if (recording) {
           const row = filteredKeypoints.flatMap(kp => [kp.x, kp.y, kp.score]);
@@ -216,6 +238,8 @@
     }
 
     async function main() {
+      
+      arucoDetector = new AR.Detector();
       await setupCamera(currentFacingMode);
       detector = await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
         runtime: 'mediapipe',
@@ -230,9 +254,10 @@
     function detectArucoMarkersFromCanvas(canvas) {
       const ctx = canvas.getContext("2d");
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const markers = detector.detect(imageData);
-      return markers; // [{id, corners: [{x, y}, ...]}, ...]
+      const markers = arucoDetector.detect(imageData); // ✅ 여기 수정
+      return markers;
     }
+
     function startRecording() {
       recording = true;
       csvData = [];
