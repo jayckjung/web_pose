@@ -205,26 +205,6 @@
           }
         });
 
-        // ArUco 마커 인식
-        const arucoMarkers = detectArucoMarkersFromCanvas(canvas);
-        arucoMarkers.forEach(marker => {
-          ctx.beginPath();
-          ctx.strokeStyle = 'yellow';
-          ctx.lineWidth = 3;
-          for (let i = 0; i < marker.corners.length; i++) {
-            const c1 = marker.corners[i];
-            const c2 = marker.corners[(i + 1) % marker.corners.length];
-            ctx.moveTo(c1.x, c1.y);
-            ctx.lineTo(c2.x, c2.y);
-          }
-          ctx.stroke();
-      
-          // 마커 ID 표시
-          ctx.fillStyle = 'black';
-          ctx.font = '16px sans-serif';
-          ctx.fillText(`ID: ${marker.id}`, marker.corners[0].x, marker.corners[0].y - 10);
-        });
-
         
 
         if (recording) {
