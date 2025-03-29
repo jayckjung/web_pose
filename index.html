@@ -8,7 +8,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlazePose Web7</title>
+  <title>BlazePose Web8</title>
   <style>
     body {
       text-align: center;
@@ -105,6 +105,7 @@
     let currentFacingMode = 'user';
     let detector;
     let timestamps = [];
+    let arucoDetector;
     
     const excludeIndices = [1, 2, 3, 4, 5, 6, 9, 10, 17, 18, 21, 22];
     const keypointNames = [
@@ -177,7 +178,8 @@
       await setupCamera(currentFacingMode);
       render(); // 🔁 새 비디오로 render 재시작
     }
-    const detector = new AR.Detector();
+    arucoDetector = new AR.Detector();
+    
     async function render() {
       if (video.readyState < 2) {
         requestAnimationFrame(render);
@@ -224,7 +226,7 @@
         // ArUco 마커 인식
         const arucoMarkers = detectArucoMarkersFromCanvas(canvas);
         arucoMarkers.forEach(marker => {
-          ctx.beginPath();
+          ctx.beginPath();F
           ctx.strokeStyle = 'yellow';
           ctx.lineWidth = 3;
           for (let i = 0; i < marker.corners.length; i++) {
@@ -240,6 +242,8 @@
           ctx.font = '16px sans-serif';
           ctx.fillText(`ID: ${marker.id}`, marker.corners[0].x, marker.corners[0].y - 10);
         });
+
+        
         if (recording) {
           const row = filteredKeypoints.flatMap(kp => [kp.x, kp.y, kp.score]);
           csvData.push(row);
