@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlazePose Web6</title>
+  <title>BlazePose Web7</title>
   <style>
     body {
       text-align: center;
@@ -76,24 +73,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+  <!-- Arco -->
+  <script src="https://cdn.jsdelivr.net/gh/jcmellado/js-aruco/build/aruco.min.js"></script>
 
   <script>
 
   
-    // ✅ Firebase 초기화 (firebaseConfig는 네 설정값으로 대체해야 함)
-    const firebaseConfig = {
-      apiKey: "AIzaSyAFYq5Er5h62USTGzpW9G-Wzui7YM9ooOQ",
-      authDomain: "webpose-dc1a7.firebaseapp.com",
-      databaseURL: "https://webpose-dc1a7-default-rtdb.firebaseio.com",
-      projectId: "webpose-dc1a7",
-      storageBucket: "webpose-dc1a7.firebasestorage.app",
-      messagingSenderId: "238230161559",
-      appId: "1:238230161559:web:caf79298ecfbc7321c01d2",
-      measurementId: "G-0G6JYLMFZY"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
     
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
@@ -145,6 +130,8 @@
       [12, 14], [14, 16], [16, 18], [18, 20],
       [0, 21], [21, 11], [21, 12], [0, 22]
     ];
+
+    const detector = new AR.Detector(); // marker
 
     async function setupCamera(facingMode = 'user') {
       if (video.srcObject) {
@@ -217,6 +204,28 @@
             ctx.stroke();
           }
         });
+
+        // ArUco 마커 인식
+        const arucoMarkers = detectArucoMarkersFromCanvas(canvas);
+        arucoMarkers.forEach(marker => {
+          ctx.beginPath();
+          ctx.strokeStyle = 'yellow';
+          ctx.lineWidth = 3;
+          for (let i = 0; i < marker.corners.length; i++) {
+            const c1 = marker.corners[i];
+            const c2 = marker.corners[(i + 1) % marker.corners.length];
+            ctx.moveTo(c1.x, c1.y);
+            ctx.lineTo(c2.x, c2.y);
+          }
+          ctx.stroke();
+      
+          // 마커 ID 표시
+          ctx.fillStyle = 'black';
+          ctx.font = '16px sans-serif';
+          ctx.fillText(`ID: ${marker.id}`, marker.corners[0].x, marker.corners[0].y - 10);
+        });
+
+        
 
         if (recording) {
           const row = filteredKeypoints.flatMap(kp => [kp.x, kp.y, kp.score]);
@@ -292,7 +301,12 @@
       a.download = filename;
       a.click();
     }
-
+    function detectArucoMarkersFromCanvas(canvas) {
+      const ctx = canvas.getContext("2d");
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const markers = detector.detect(imageData);
+      return markers; // [{id, corners: [{x, y}, ...]}, ...]
+    }
     main();
   </script>
 </body>
