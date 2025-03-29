@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlazePose Web10</title>
+  <title>BlazePose Web11</title>
   <style>
     body {
       text-align: center;
@@ -204,6 +204,27 @@
           }
         });
 
+        // 🟡 ArUco 마커 처리
+        const markers = arucoDetector ? arucoDetector.detect(imageData) : [];
+        markers.forEach(marker => {
+          ctx.beginPath();
+          ctx.strokeStyle = 'yellow';
+          ctx.lineWidth = 3;
+      
+          const corners = marker.corners;
+          for (let i = 0; i < corners.length; i++) {
+            const c1 = corners[i];
+            const c2 = corners[(i + 1) % corners.length];
+            ctx.moveTo(c1.x, c1.y);
+            ctx.lineTo(c2.x, c2.y);
+          }
+          ctx.stroke();
+      
+          // 🔢 마커 ID 표시
+          ctx.fillStyle = 'black';
+          ctx.font = '16px sans-serif';
+          ctx.fillText(`ID: ${marker.id}`, corners[0].x, corners[0].y - 10);
+        });
         
         
 
@@ -232,6 +253,7 @@
 
 
     function detectArucoMarkersFromCanvas(canvas) {
+      if (!arucoDetector) return []; // 아직 초기화 안 됐으면 빈 배열 반환
       const ctx = canvas.getContext("2d");
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const markers = arucoDetector.detect(imageData); // ✅ 여기 수정
