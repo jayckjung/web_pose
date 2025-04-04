@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlazePose Web13</title>
+  <title>BlazePose Web14</title>
   <style>
     body {
       text-align: center;
@@ -182,6 +182,15 @@
           }
         });
 
+        const angles = computeAngles(kpMap);
+      // ✅ 각도 표시 - keypoint와 무관하게 한 번만 출력
+        ctx.fillStyle = 'black';
+        ctx.font = '20px Arial';
+        let y = 30;
+        for (const [name, angle] of Object.entries(angles)) {
+          ctx.fillText(`${name}: ${angle.toFixed(1)}°`, 10, y);
+          y += 25;
+        }
         filteredKeypoints.forEach((kp, i) => {
           if (kp.score > 0.4) {
             ctx.beginPath();
@@ -191,13 +200,6 @@
             ctx.font = '10px sans-serif';
             ctx.fillStyle = 'blue';
             ctx.fillText(keypointNames[i], kp.x + 6, kp.y + 6);
-              // 캔버스에 표시
-            ctx.fillStyle = 'black';
-            ctx.font = '20px Arial';
-            let y = 30;
-            for (const [name, angle] of Object.entries(angles)) {
-              ctx.fillText(`${name}: ${angle.toFixed(1)}°`, 10, y);
-              y += 25;
             }      
           }
         });
