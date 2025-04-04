@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlazePose Web14</title>
+  <title>BlazePose Web15</title>
   <style>
     body {
       text-align: center;
@@ -246,6 +246,7 @@
 
 
     function getAngle(a, b, c) {
+      if (!a || !b || !c) return NaN;
       const ab = {x: b.x - a.x, y: b.y - a.y};
       const cb = {x: b.x - c.x, y: b.y - c.y};
       const dot = ab.x * cb.x + ab.y * cb.y;
@@ -258,34 +259,36 @@
     function computeAngles(kp) {
       const angles = {};
     
-      // 무릎: hip - knee - ankle
+      // 각도 계산 (값이 없으면 NaN이 리턴됨)
       angles.leftKnee = getAngle(kp['left_hip'], kp['left_knee'], kp['left_ankle']);
       angles.rightKnee = getAngle(kp['right_hip'], kp['right_knee'], kp['right_ankle']);
     
-      // 발목: knee - ankle - foot_index
       angles.leftAnkle = getAngle(kp['left_knee'], kp['left_ankle'], kp['left_foot_index']);
       angles.rightAnkle = getAngle(kp['right_knee'], kp['right_ankle'], kp['right_foot_index']);
     
-      // 힙 조인트: shoulder - hip - knee
       angles.leftHip = getAngle(kp['left_shoulder'], kp['left_hip'], kp['left_knee']);
       angles.rightHip = getAngle(kp['right_shoulder'], kp['right_hip'], kp['right_knee']);
     
-      // 골반 vs 상체: 좌우 힙, 좌우 어깨 이용
-      const pelvisVec = {
-        x: kp['right_hip'].x - kp['left_hip'].x,
-        y: kp['right_hip'].y - kp['left_hip'].y,
-      };
-      const shoulderVec = {
-        x: kp['right_shoulder'].x - kp['left_shoulder'].x,
-        y: kp['right_shoulder'].y - kp['left_shoulder'].y,
-      };
-      const dot = pelvisVec.x * shoulderVec.x + pelvisVec.y * shoulderVec.y;
-      const len1 = Math.hypot(pelvisVec.x, pelvisVec.y);
-      const len2 = Math.hypot(shoulderVec.x, shoulderVec.y);
-      angles.trunkTilt = Math.acos(dot / (len1 * len2)) * (180 / Math.PI);
+      // 골반 vs 상체 각도 (벡터 기반)
+      if (kp['left_hip'] && kp['right_hip'] && kp['left_shoulder'] && kp['right_shoulder']) {
+        const pelvisVec = {
+          x: kp['right_hip'].x - kp['left_hip'].x,
+          y: kp['right_hip'].y - kp['left_hip'].y,
+        };
+        const shoulderVec = {
+          x: kp['right_shoulder'].x - kp['left_shoulder'].x,
+          y: kp['right_shoulder'].y - kp['left_shoulder'].y,
+        };
+        const dot = pelvisVec.x * shoulderVec.x + pelvisVec.y * shoulderVec.y;
+        const len1 = Math.hypot(pelvisVec.x, pelvisVec.y);
+        const len2 = Math.hypot(shoulderVec.x, shoulderVec.y);
+        angles.trunkTilt = Math.acos(dot / (len1 * len2)) * (180 / Math.PI);
+      } else {
+        angles.trunkTilt = NaN;
+      }
     
       return angles;
-  }
+    }
 
     function startRecording() {
       recording = true;
