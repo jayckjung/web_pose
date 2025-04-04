@@ -175,6 +175,12 @@
       if (poses.length > 0 && poses[0].keypoints) {
         const keypoints = poses[0].keypoints;
         const filteredKeypoints = keypoints.filter((_, i) => !excludeIndices.includes(i));
+        const kpMap = {};
+        keypoints.forEach(kp => {
+          if (kp.score > 0.4 && keypointNames.includes(kp.name)) {
+            kpMap[kp.name] = kp;
+          }
+        });
 
         filteredKeypoints.forEach((kp, i) => {
           if (kp.score > 0.4) {
@@ -185,6 +191,14 @@
             ctx.font = '10px sans-serif';
             ctx.fillStyle = 'blue';
             ctx.fillText(keypointNames[i], kp.x + 6, kp.y + 6);
+              // 캔버스에 표시
+            ctx.fillStyle = 'black';
+            ctx.font = '20px Arial';
+            let y = 30;
+            for (const [name, angle] of Object.entries(angles)) {
+              ctx.fillText(`${name}: ${angle.toFixed(1)}°`, 10, y);
+              y += 25;
+            }      
           }
         });
 
@@ -230,6 +244,47 @@
     }
 
 
+    function getAngle(a, b, c) {
+      const ab = {x: b.x - a.x, y: b.y - a.y};
+      const cb = {x: b.x - c.x, y: b.y - c.y};
+      const dot = ab.x * cb.x + ab.y * cb.y;
+      const abLen = Math.sqrt(ab.x ** 2 + ab.y ** 2);
+      const cbLen = Math.sqrt(cb.x ** 2 + cb.y ** 2);
+      const angle = Math.acos(dot / (abLen * cbLen));
+      return angle * (180 / Math.PI);
+    }
+
+    function computeAngles(kp) {
+      const angles = {};
+    
+      // 무릎: hip - knee - ankle
+      angles.leftKnee = getAngle(kp['left_hip'], kp['left_knee'], kp['left_ankle']);
+      angles.rightKnee = getAngle(kp['right_hip'], kp['right_knee'], kp['right_ankle']);
+    
+      // 발목: knee - ankle - foot_index
+      angles.leftAnkle = getAngle(kp['left_knee'], kp['left_ankle'], kp['left_foot_index']);
+      angles.rightAnkle = getAngle(kp['right_knee'], kp['right_ankle'], kp['right_foot_index']);
+    
+      // 힙 조인트: shoulder - hip - knee
+      angles.leftHip = getAngle(kp['left_shoulder'], kp['left_hip'], kp['left_knee']);
+      angles.rightHip = getAngle(kp['right_shoulder'], kp['right_hip'], kp['right_knee']);
+    
+      // 골반 vs 상체: 좌우 힙, 좌우 어깨 이용
+      const pelvisVec = {
+        x: kp['right_hip'].x - kp['left_hip'].x,
+        y: kp['right_hip'].y - kp['left_hip'].y,
+      };
+      const shoulderVec = {
+        x: kp['right_shoulder'].x - kp['left_shoulder'].x,
+        y: kp['right_shoulder'].y - kp['left_shoulder'].y,
+      };
+      const dot = pelvisVec.x * shoulderVec.x + pelvisVec.y * shoulderVec.y;
+      const len1 = Math.hypot(pelvisVec.x, pelvisVec.y);
+      const len2 = Math.hypot(shoulderVec.x, shoulderVec.y);
+      angles.trunkTilt = Math.acos(dot / (len1 * len2)) * (180 / Math.PI);
+    
+      return angles;
+  }
 
     function startRecording() {
       recording = true;
