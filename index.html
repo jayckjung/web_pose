@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlazePose Web15</title>
+  <title>BlazePose Web16</title>
   <style>
     body {
       text-align: center;
@@ -183,6 +183,17 @@
         });
 
         const angles = computeAngles(kpMap);
+
+        // 예시: 왼쪽 무릎
+        drawAngleLabel(ctx, kpMap['left_hip'], kpMap['left_knee'], kpMap['left_ankle'], angles.leftKnee, 'LKnee');
+        drawAngleLabel(ctx, kpMap['right_hip'], kpMap['right_knee'], kpMap['right_ankle'], angles.rightKnee, 'RKnee');
+        
+        drawAngleLabel(ctx, kpMap['left_knee'], kpMap['left_ankle'], kpMap['left_foot_index'], angles.leftAnkle, 'LAnkle');
+        drawAngleLabel(ctx, kpMap['right_knee'], kpMap['right_ankle'], kpMap['right_foot_index'], angles.rightAnkle, 'RAnkle');
+        
+        drawAngleLabel(ctx, kpMap['left_shoulder'], kpMap['left_hip'], kpMap['left_knee'], angles.leftHip, 'LHip');
+        drawAngleLabel(ctx, kpMap['right_shoulder'], kpMap['right_hip'], kpMap['right_knee'], angles.rightHip, 'RHip');
+
       // ✅ 각도 표시 - keypoint와 무관하게 한 번만 출력
         ctx.fillStyle = 'black';
         ctx.font = '20px Arial';
@@ -289,6 +300,26 @@
     
       return angles;
     }
+
+    function drawAngleLabel(ctx, a, b, c, angle, label) {
+      if (!a || !b || !c) return;
+    
+      // 선 그리기
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.lineTo(c.x, c.y);
+      ctx.strokeStyle = 'orange';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    
+      // 각도 텍스트 그리기 (b 포인트에 붙임)
+      ctx.fillStyle = 'purple';
+      ctx.font = '16px Arial';
+      ctx.fillText(`${label}: ${angle.toFixed(1)}°`, b.x + 10, b.y - 10);
+    }
+
+
 
     function startRecording() {
       recording = true;
